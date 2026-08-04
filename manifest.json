@@ -1,0 +1,31 @@
+{
+  "manifest_version": 3,
+  "name": "BridgeTopia",
+  "version": "0.1.2",
+  "description": "BridgeTopia's extension, search and export deals to BridgeTopia",
+  "permissions": ["storage", "scripting"],
+  "comment_icons": "Four sizes of one drawing, resampled from the 128 with sips rather than left to Chrome: the toolbar draws it at 16 and letting the browser scale a 128 down that far turns the BT monogram to mush. 16/32 are the toolbar, 48 is chrome://extensions, 128 is the install prompt.",
+  "icons": {
+    "16": "icons/16.png",
+    "32": "icons/32.png",
+    "48": "icons/48.png",
+    "128": "icons/128.png"
+  },
+  "comment_hosts": "Granted at install: BBO, and localhost:8080 as the default import target — that pair covers an untouched install with no prompt, and DEFAULT_SERVER in src/worker.js and src/popup.js is the same string. The wildcards are *optional*, so they are not granted at install and not usable until popup.html's ⚙ calls chrome.permissions.request() for one concrete origin. They exist because the import target moved onto a tailnet, where it is a hostname this build cannot know.",
+  "host_permissions": ["https://www.bridgebase.com/*", "http://localhost:8080/*"],
+  "optional_host_permissions": ["http://*/*", "https://*/*"],
+  "background": { "service_worker": "src/worker.js" },
+  "content_scripts": [
+    {
+      "comment": "One entry for the whole host, because same-origin is a property of the origin and not of the path — the popup only needs *some* logged-in BBO tab to run its fetches in. There is nothing on any page, so nothing here cares which page it is. It used to be two entries, hands.php with a download bar of its own plus everything-else without it, which needed exclude_matches to stop parse.js being evaluated twice in one isolated world; one entry cannot collide with itself.",
+      "matches": ["https://www.bridgebase.com/*"],
+      "js": ["src/parse.js", "src/pull.js", "src/listen.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_title": "BridgeTopia",
+    "default_popup": "src/popup.html",
+    "default_icon": { "16": "icons/16.png", "32": "icons/32.png" }
+  }
+}

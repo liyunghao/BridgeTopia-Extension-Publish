@@ -1,0 +1,367 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <title>BBO → BridgeTopia</title>
+    <style>
+      :root {
+        --bg: #f4ecd6;
+        --panel: #fffdf4;
+        --head: #efe6cb;
+        --line: #e0d6b6;
+        --card: #fffdf4;
+        --text: #1b1b1b;
+        --muted: #6f6a5c;
+        --accent: #2563eb;
+        --accent-fg: #fff;
+        --pick: #e7efff;
+        --pick-line: #2563eb;
+        --badge: #166534;
+        --badge-bg: #dcfce7;
+        --danger: #b91c1c;
+        --warn: #92400e;
+        --warn-bg: #fef3c7;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #141414;
+          --panel: #242424;
+          --head: #1c1c1c;
+          --line: #353535;
+          --card: #2b2b2b;
+          --text: #e9e9e9;
+          --muted: #9b9b9b;
+          --accent: #3b74e0;
+          --accent-fg: #fff;
+          --pick: #15233f;
+          --pick-line: #4a7ee8;
+          --badge: #4ade80;
+          --badge-bg: #14351f;
+          --danger: #f87171;
+          --warn: #fbbf24;
+          --warn-bg: #3a2e12;
+        }
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        width: 25rem;
+        margin: 0;
+        padding-bottom: 0.5rem;
+        background: var(--bg);
+        color: var(--text);
+        font: 14px/1.5 system-ui, -apple-system, 'Noto Sans TC', sans-serif;
+        overflow-wrap: anywhere;
+      }
+
+      #steps {
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.55rem 0.8rem;
+        font-size: 0.85rem;
+        color: var(--muted);
+      }
+      .step b {
+        display: inline-grid;
+        place-items: center;
+        width: 1.25rem;
+        height: 1.25rem;
+        margin-right: 0.25rem;
+        border-radius: 50%;
+        background: var(--line);
+        color: var(--muted);
+        font-size: 0.75rem;
+      }
+      .step.on {
+        color: var(--text);
+      }
+      .step.on b {
+        background: var(--accent);
+        color: var(--accent-fg);
+      }
+
+      .panel {
+        margin-bottom: 0.5rem;
+        padding: 0.8rem;
+        background: var(--panel);
+        border-top: 1px solid var(--line);
+        border-bottom: 1px solid var(--line);
+      }
+      .head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin: -0.8rem -0.8rem 0.7rem;
+        padding: 0.5rem 0.8rem;
+        background: var(--head);
+        border-bottom: 1px solid var(--line);
+        font-size: 0.9rem;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 0.25rem;
+        color: var(--muted);
+        font-size: 0.8rem;
+      }
+      input[type='text'],
+      input[type='date'] {
+        width: 100%;
+        padding: 0.5rem 0.6rem;
+        font: inherit;
+        color: var(--text);
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 0.5rem;
+      }
+      .dates {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.5rem;
+        margin: 0.5rem 0;
+      }
+      .chips {
+        display: flex;
+        gap: 0.4rem;
+        margin-bottom: 0.6rem;
+      }
+      .chip {
+        padding: 0.25rem 0.6rem;
+        font: inherit;
+        font-size: 0.85rem;
+        color: var(--muted);
+        background: transparent;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        cursor: pointer;
+      }
+      .chip.on {
+        color: var(--text);
+        background: var(--pick);
+        border-color: var(--pick-line);
+      }
+
+      .primary {
+        display: block;
+        width: 100%;
+        padding: 0.6rem;
+        font: inherit;
+        font-weight: 600;
+        color: var(--accent-fg);
+        background: var(--accent);
+        border: 0;
+        border-radius: 0.6rem;
+        cursor: pointer;
+      }
+      .primary:disabled {
+        opacity: 0.45;
+        cursor: default;
+      }
+      .ghost {
+        padding: 0.5rem 0.7rem;
+        font: inherit;
+        color: var(--text);
+        background: transparent;
+        border: 1px solid var(--line);
+        border-radius: 0.6rem;
+        cursor: pointer;
+      }
+      .ghost.link {
+        padding: 0.15rem;
+        color: var(--accent);
+        border: 0;
+      }
+      .ghost.danger {
+        color: var(--danger);
+        border-color: var(--danger);
+      }
+      .row {
+        display: flex;
+        gap: 0.5rem;
+      }
+      .row .primary,
+      .row input {
+        flex: 1;
+        min-width: 0;
+      }
+      #serverBtn {
+        margin-left: auto;
+        font-size: 1rem;
+        line-height: 1;
+      }
+
+      .card {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 0.05rem 0.55rem;
+        align-items: start;
+        margin-bottom: 0.5rem;
+        padding: 0.55rem 0.6rem;
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 0.6rem;
+        cursor: pointer;
+      }
+      .card:has(input:checked) {
+        background: var(--pick);
+        border-color: var(--pick-line);
+      }
+      .card.done {
+        opacity: 0.55;
+        cursor: default;
+      }
+      .card input {
+        width: 1.05rem;
+        height: 1.05rem;
+        margin: 0.2rem 0 0;
+        accent-color: var(--accent);
+      }
+      .card .title {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.4rem;
+        align-items: center;
+        font-weight: 600;
+      }
+      .card .meta {
+        grid-column: 2;
+        color: var(--muted);
+        font-size: 0.8rem;
+      }
+      .badge {
+        padding: 0.05rem 0.4rem;
+        font-size: 0.72rem;
+        font-weight: 500;
+        color: var(--badge);
+        background: var(--badge-bg);
+        border-radius: 999px;
+      }
+
+      .state {
+        margin-top: 0.55rem;
+        font-size: 0.85rem;
+        color: var(--muted);
+      }
+      .state.empty {
+        padding: 0.6rem;
+        color: var(--text);
+        background: var(--head);
+        border: 1px solid var(--line);
+        border-radius: 0.5rem;
+      }
+      .state.warn {
+        padding: 0.5rem 0.6rem;
+        color: var(--warn);
+        background: var(--warn-bg);
+        border-radius: 0.5rem;
+      }
+      .state.err {
+        color: var(--danger);
+      }
+      .state p {
+        margin: 0;
+      }
+      .state .url {
+        margin-top: 0.4rem;
+        font-size: 0.75rem;
+        color: var(--muted);
+      }
+      .note {
+        margin: 0.6rem 0 0;
+        color: var(--muted);
+        font-size: 0.8rem;
+      }
+      .qrow {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 0.3rem;
+        font-size: 0.85rem;
+      }
+      .qrow .drop {
+        color: var(--danger);
+        flex: none;
+      }
+      .muted {
+        color: var(--muted);
+        font-size: 0.85rem;
+      }
+      #progress {
+        margin: 0.5rem 0;
+      }
+      progress {
+        width: 100%;
+        height: 0.4rem;
+      }
+      #importBar {
+        margin-bottom: 0.5rem;
+      }
+    </style>
+  </head>
+  <body>
+    <nav id="steps">
+      <span class="step" data-step="1"><b>1</b>查詢</span>
+      <span>›</span>
+      <span class="step" data-step="2"><b>2</b>下載</span>
+      <span>›</span>
+      <span class="step" data-step="3"><b>3</b>匯入</span>
+      <button id="serverBtn" class="ghost link" title="匯入的目的地">⚙</button>
+    </nav>
+
+    <section class="panel" id="serverPanel" hidden>
+      <label for="server">匯入的目的地</label>
+      <div class="row">
+        <input id="server" type="text" placeholder="http://localhost:8080" autocomplete="off" />
+        <button id="serverSave" class="ghost">存起來</button>
+      </div>
+      <div id="serverState"></div>
+    </section>
+
+    <section class="panel">
+      <label for="handle">BBO username</label>
+      <input id="handle" type="text" placeholder="例如 bboplayer" autocomplete="off" />
+      <div class="dates">
+        <input id="from" type="date" />
+        <input id="to" type="date" />
+      </div>
+      <div class="chips">
+        <button class="chip" data-days="7">近 7 天</button>
+        <button class="chip" data-days="30">近 30 天</button>
+        <button class="chip" data-days="month">本月</button>
+      </div>
+      <button id="surveyBtn" class="primary">查詢 session</button>
+      <div id="findState"></div>
+    </section>
+
+    <section class="panel" id="pick" hidden>
+      <div class="head">
+        <span id="foundCount"></span>
+        <button id="toggleBtn" class="ghost link"></button>
+      </div>
+      <div id="found"></div>
+      <div id="progress" hidden>
+        <progress id="bar" value="0" max="1"></progress>
+        <div id="progressText" class="note"></div>
+      </div>
+      <button id="go" class="primary"></button>
+      <div id="pullState"></div>
+    </section>
+
+    <section class="panel">
+      <div class="head">
+        <span>等待匯入</span><span id="pendingCount" class="muted"></span>
+      </div>
+      <div id="pending"></div>
+      <progress id="importBar" hidden></progress>
+      <div class="row">
+        <button id="importBtn" class="primary">匯入到 BridgeTopia</button>
+        <button id="clearBtn" class="ghost danger" title="清除等待匯入的牌局">🗑</button>
+      </div>
+      <div id="statusLine"></div>
+    </section>
+    <script src="popup.js"></script>
+  </body>
+</html>
