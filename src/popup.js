@@ -78,7 +78,7 @@ function card(s, checked) {
   box.addEventListener('change', refresh)
 
   const title = Object.assign(el('div', ''), { className: 'title' })
-  title.append(el('span', s.label || s.date))
+  title.append(el('span', repairMojibake(s.label || s.date)))
   if (done) title.append(Object.assign(el('span', '已下載'), { className: 'badge' }))
 
   const bits = [s.date.slice(5), s.kind || '不明', `${done ? s.total : s.boards.length} 副`]
@@ -127,16 +127,12 @@ async function showSurvey(r, redraw = false) {
     pick.hidden = true
     state(
       findState,
-      [
-        el(
-          'p',
-          r.rows > 0
-            ? `${r.from} 到 ${r.to} 這段沒有牌局。帳號「${r.username}」是好的：` +
-                `BBO 回了 ${r.rows} 列的清單，帳號不對的話一列都不會有。把起始日往前拉。`
-            : `BBO 沒有回出清單（0 列）。可能是那個分頁登出了，或帳號「${r.username}」不存在。`,
-        ),
-        Object.assign(el('p', r.url), { className: 'url' }),
-      ],
+      r.rows > 0
+        ? `${r.from} 到 ${r.to} 這段沒有牌局。`
+        : [
+            el('p', `BBO 沒有回出清單（0 列）。可能是那個分頁登出了，或帳號「${r.username}」不存在。`),
+            Object.assign(el('p', r.url), { className: 'url' }),
+          ],
       'empty',
     )
     return
@@ -177,7 +173,17 @@ async function doSurvey() {
     await chrome.storage.local.set({ survey })
     await showSurvey(survey)
   } catch (err) {
-    state(findState, `失敗：${err.message}`, 'err')
+    const link = Object.assign(document.createElement('a'), {
+      href: MYHANDS,
+      target: '_blank',
+      rel: 'noreferrer',
+      textContent: '去登入（勾著 Keep me logged in，30 天內不用再登）',
+    })
+    state(
+      findState,
+      err.message === LOGGED_OUT ? [el('p', `失敗：${err.message}`), link] : `失敗：${err.message}`,
+      'err',
+    )
   } finally {
     surveyBtn.disabled = false
   }
@@ -254,7 +260,7 @@ async function queuedIds() {
 }
 
 function queuedRow(s) {
-  const name = s.label || s.date
+  const name = repairMojibake(s.label || s.date)
   const drop = Object.assign(el('button', '✕'), {
     className: 'ghost link drop',
     title: `把「${name}」移出佇列（不動其他場）`,

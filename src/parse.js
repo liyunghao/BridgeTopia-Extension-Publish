@@ -94,6 +94,24 @@ function groupSessions(rows) {
   return sessions.filter((s) => s.boards.length > 0)
 }
 
+const MYHANDS = 'https://www.bridgebase.com/myhands/'
+
+const LOGGED_OUT = 'BBO 的 myhands 沒登入'
+
+function repairMojibake(s) {
+  const bytes = new Uint8Array(s.length)
+  for (let i = 0; i < s.length; i++) {
+    const c = s.charCodeAt(i)
+    if (c > 0xff) return s
+    bytes[i] = c
+  }
+  try {
+    return new TextDecoder('utf-8', { fatal: true }).decode(bytes)
+  } catch {
+    return s
+  }
+}
+
 function dedupe(sessions, seen = new Set()) {
   return sessions
     .map((s) => ({ ...s, boards: s.boards.filter((b) => !seen.has(b.id) && seen.add(b.id)) }))
@@ -118,6 +136,7 @@ if (typeof module !== 'undefined') {
     idsOf,
     fetched,
     isColumnHeader,
+    repairMojibake,
     resolve,
     matchURL,
     handURL,

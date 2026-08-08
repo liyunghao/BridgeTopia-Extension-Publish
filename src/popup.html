@@ -45,8 +45,11 @@
       * {
         box-sizing: border-box;
       }
-      body {
+      html {
         width: 25rem;
+      }
+      body {
+        width: 100%;
         margin: 0;
         padding-bottom: 0.5rem;
         background: var(--bg);
@@ -263,6 +266,9 @@
       .state p {
         margin: 0;
       }
+      .state a {
+        color: var(--accent);
+      }
       .state .url {
         margin-top: 0.4rem;
         font-size: 0.75rem;
@@ -362,6 +368,7 @@
       </div>
       <div id="statusLine"></div>
     </section>
+    <script src="parse.js"></script>
     <script src="popup.js"></script>
   </body>
 </html>
