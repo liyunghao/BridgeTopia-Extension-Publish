@@ -57,7 +57,7 @@ async function listing(username, from, to) {
     signal: AbortSignal.timeout(20_000),
   })
   if (!res.ok) throw new Error(`BBO 的清單回 ${res.status}`)
-  if (res.url.includes('myhands_login')) throw new Error('BBO 已登出，請重新登入')
+  if (res.url.includes('myhands_login')) throw new Error(LOGGED_OUT)
   const doc = new DOMParser().parseFromString(await res.text(), 'text/html')
   const rows = rowsFromDocument(doc)
   return { sessions: groupSessions(rows), rows: rows.length, url }
