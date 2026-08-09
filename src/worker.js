@@ -64,7 +64,6 @@ async function importPending() {
   return { boards: sent.size, imported: body.imported }
 }
 
-
 chrome.runtime.onMessage.addListener((msg, _sender, reply) => {
   if (msg?.type === 'enqueue') {
     enqueue(msg.sessions)
@@ -82,5 +81,5 @@ chrome.runtime.onMessage.addListener((msg, _sender, reply) => {
   importPending()
     .then((r) => reply({ ok: true, ...r }))
     .catch((err) => reply({ ok: false, error: err.message }))
-  return true // reply comes later
+  return true
 })

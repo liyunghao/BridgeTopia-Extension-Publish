@@ -1,10 +1,3 @@
-// Runs inside a page on www.bridgebase.com, and it has to: a fetch from there to
-// /myhands/hands.php is same-origin, so the browser attaches the session by itself. Nothing
-// here reads document.cookie and the extension has no "cookies" permission.
-//
-// It cannot move to the service worker — a fetch from there is cross-origin, where whether
-// the session rides along is up to SameSite rather than up to us.
-
 const FETCH_GAP_MS = 300
 
 const MAX_GAP_MS = 2400
@@ -16,7 +9,6 @@ const BACKOFF_MS = 2000
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 
 const count = (sessions) => sessions.reduce((n, s) => n + s.boards.length, 0)
-
 
 function midnight(isoDate) {
   return Math.floor(new Date(`${isoDate}T00:00:00`).getTime() / 1000)
@@ -33,18 +25,6 @@ function listingURL(username, from, to) {
     username,
     start_time: String(midnight(from)),
     end_time: String(midnightAfter(to)),
-    // Without offset, hands.php does not serve the listing at all. It serves a bootstrap
-    // page whose entire job is to run
-    //
-    //   document.tz_form.offset.value = new Date().getTimezoneOffset()
-    //   document.tz_form.submit()
-    //
-    // and resubmit itself. A real navigation runs that script; DOMParser does not, so
-    // fetching without this returns a page with no boards and no error to explain the
-    // emptiness. That page's own no-JS fallback link is ?offset=0, i.e. this parameter.
-    //
-    // Minutes behind UTC, matching BBO's own form. The bounds above are already local
-    // midnights, so this keeps both ends on the same clock.
     offset: String(new Date().getTimezoneOffset()),
   })
   return `https://www.bridgebase.com/myhands/hands.php?${p}`
@@ -132,7 +112,10 @@ async function grab(url, label, notify, pace) {
       credentials: 'same-origin',
       signal: AbortSignal.timeout(10_000),
     })
-    if (res.ok) return await res.text()
+    if (res.ok) {
+      if (res.url.includes('myhands_login')) throw new Error(LOGGED_OUT)
+      return await res.text()
+    }
     if (res.status === 429) pace?.slower()
     if (res.status !== 429 || attempt === RETRIES) {
       throw new Error(`${label}回 ${res.status}`)

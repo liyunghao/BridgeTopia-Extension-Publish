@@ -19,6 +19,21 @@ const bar = $('bar')
 
 const el = (tag, text) => Object.assign(document.createElement(tag), { textContent: text })
 
+const NO_BBO_TAB = '沒有開著的 BBO 分頁'
+
+const NEEDS_LOGIN = [LOGGED_OUT, NO_BBO_TAB]
+
+function withLogin(msg) {
+  if (!NEEDS_LOGIN.some((s) => msg.includes(s))) return msg
+  const link = Object.assign(document.createElement('a'), {
+    href: MYHANDS,
+    target: '_blank',
+    rel: 'noreferrer',
+    textContent: '去登入（勾著 Keep me logged in，30 天內不用再登）',
+  })
+  return [el('p', msg), link]
+}
+
 function state(node, text, kind = '') {
   node.className = text ? `state ${kind}` : ''
   node.replaceChildren(...[text].flat())
@@ -59,7 +74,6 @@ async function chosenRange() {
   await chrome.storage.sync.set({ handle: username })
   return { username, from: from.value, to: to.value }
 }
-
 
 function card(s, checked) {
   const done = s.boards.length === 0
@@ -169,17 +183,7 @@ async function doSurvey() {
     await chrome.storage.local.set({ survey })
     await showSurvey(survey)
   } catch (err) {
-    const link = Object.assign(document.createElement('a'), {
-      href: MYHANDS,
-      target: '_blank',
-      rel: 'noreferrer',
-      textContent: '去登入（勾著 Keep me logged in，30 天內不用再登）',
-    })
-    state(
-      findState,
-      err.message === LOGGED_OUT ? [el('p', `失敗：${err.message}`), link] : `失敗：${err.message}`,
-      'err',
-    )
+    state(findState, withLogin(`失敗：${err.message}`), 'err')
   } finally {
     surveyBtn.disabled = false
   }
@@ -213,12 +217,12 @@ async function doPull(sessions) {
     state(
       pullState,
       r.error
-        ? `存下 ${r.boards}/${r.total} 副後停住：${r.error}。等一下再按查詢，會只補剩下的。`
+        ? withLogin(`存下 ${r.boards}/${r.total} 副後停住：${r.error}。等一下再按查詢，會只補剩下的。`)
         : `已存下 ${r.boards} 副。`,
       r.error ? 'warn' : '',
     )
   } catch (err) {
-    state(pullState, `失敗：${err.message}`, 'err')
+    state(pullState, withLogin(`失敗：${err.message}`), 'err')
   } finally {
     pulling = false
     await render()
@@ -309,19 +313,33 @@ async function doClear() {
 
 const SPRINGBOARD = ['src/parse.js', 'src/pull.js', 'src/listen.js']
 
-async function ask(msg) {
-  const [tab] = await chrome.tabs.query({ url: 'https://www.bridgebase.com/*' })
-  if (!tab) throw new Error('請先開著一個 bridgebase.com 的分頁並保持登入')
-  let reply
+async function send(tabId, msg) {
   try {
-    reply = await chrome.tabs.sendMessage(tab.id, msg)
+    return await chrome.tabs.sendMessage(tabId, msg)
   } catch {
-    const { status } = await chrome.tabs.get(tab.id)
-    if (status !== 'complete') throw new Error('那個 BBO 分頁還在載入，等一下再按一次')
-    await chrome.scripting.executeScript({ target: { tabId: tab.id }, files: SPRINGBOARD })
-    reply = await chrome.tabs.sendMessage(tab.id, msg)
+    await chrome.scripting.executeScript({ target: { tabId }, files: SPRINGBOARD })
+    return await chrome.tabs.sendMessage(tabId, msg)
   }
-  if (!reply?.ok) throw new Error(reply?.error ?? '沒有回應')
+}
+
+async function ask(msg) {
+  const tabs = await chrome.tabs.query({ url: 'https://www.bridgebase.com/*' })
+  if (tabs.length === 0) throw new Error(`${NO_BBO_TAB}。查詢需要至少一個 BBO 分頁開著。`)
+  const ready = tabs.filter((t) => t.status === 'complete')
+  if (ready.length === 0) throw new Error('BBO 分頁還在載入，等一下再按一次')
+
+  let reply
+  let lastErr
+  for (const tab of ready) {
+    try {
+      reply = await send(tab.id, msg)
+      break
+    } catch (err) {
+      lastErr = err
+    }
+  }
+  if (!reply) throw new Error(`跟 BBO 分頁講不上話：${lastErr?.message ?? '沒有回應'}`)
+  if (!reply.ok) throw new Error(reply.error ?? '沒有回應')
   return reply
 }
 

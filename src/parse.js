@@ -1,18 +1,3 @@
-// Reading BBO's myhands listing. Row shapes measured on a real account, 2026-07-29:
-//
-//   1 cell    "Hands played by «user» since «start» to «end»"   — the page title
-//   3 cells   "Main Bridge Club hands | Tourney hands | Team Match hands"
-//             — a legend of the three kinds, NOT a divider: a window shows only
-//               the kinds you actually played
-//   1 cell    "2026-07-17"                                      — a date separator
-//  11 cells   Nº | Time | North | South | East | West | Result | Points | Score |
-//             Movie | Traveller                                 — starts a session
-//   5 cells   the team-match line, carrying a link to tview.php  — only for teams
-//  11 cells   one board, carrying a link to fetchlin.php?id=…&when_played=…
-//
-// groupSessions takes plain data rather than a document so it can be tested in node with
-// no DOM. rowsFromDocument is the only part that touches one.
-
 const LISTING_BASE = 'https://www.bridgebase.com/myhands/hands.php'
 
 function resolve(href) {

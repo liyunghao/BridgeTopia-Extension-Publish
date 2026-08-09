@@ -1,17 +1,15 @@
 {
   "manifest_version": 3,
   "name": "BridgeTopia",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "BridgeTopia's extension, search and export deals to BridgeTopia",
   "permissions": ["storage", "scripting"],
-  "comment_icons": "Four sizes of one drawing, resampled from the 128 with sips rather than left to Chrome: the toolbar draws it at 16 and letting the browser scale a 128 down that far turns the BT monogram to mush. 16/32 are the toolbar, 48 is chrome://extensions, 128 is the install prompt.",
   "icons": {
     "16": "icons/16.png",
     "32": "icons/32.png",
     "48": "icons/48.png",
     "128": "icons/128.png"
   },
-  "comment_hosts": "Two hosts, both required, both granted at install: BBO, where the listing needs the user's own session, and the one BridgeTopia server every user of this build imports into — the same string as SERVER in src/worker.js. No wildcards and no optional origins: the address is fixed at build time, so there is nothing for the user to type and nothing to request at runtime.",
   "host_permissions": [
     "https://www.bridgebase.com/*",
     "https://bridgetopia.long-becrux.ts.net/*"
@@ -19,7 +17,6 @@
   "background": { "service_worker": "src/worker.js" },
   "content_scripts": [
     {
-      "comment": "One entry for the whole host, because same-origin is a property of the origin and not of the path — the popup only needs *some* logged-in BBO tab to run its fetches in. There is nothing on any page, so nothing here cares which page it is. It used to be two entries, hands.php with a download bar of its own plus everything-else without it, which needed exclude_matches to stop parse.js being evaluated twice in one isolated world; one entry cannot collide with itself.",
       "matches": ["https://www.bridgebase.com/*"],
       "js": ["src/parse.js", "src/pull.js", "src/listen.js"],
       "run_at": "document_idle"
