@@ -17,15 +17,10 @@ Chrome 擴充：把你在 BBO（Bridge Base Online）打過的牌，送進 Bridg
 
 **BBO 帳號**：點擴充圖示，popup 上填一次就記住。
 
-**匯入的目的地**：輸入伺服器 URL (請跟作者拿，填完後不用改)
+**匯入的目的地**：不用設定。這個版本固定送到
+`https://bridgetopia.long-becrux.ts.net`，換電腦也不用再做一次。
 
-1. 點 popup 右上角的 **⚙**
-2. 填 origin ，例如 `https://example.ts.net`。
-3. 按「存起來」→ Chrome 會跳出對話框問這個網域的權限，**按同意**
-
-換一台電腦要再做一次第 3 步：位址會跟著 Chrome 帳號同步，**權限不會**。
-
-**還有一件事：匯入靠的是你 BridgeTopia 的登入狀態。** 同一個 Chrome 裡開著
+**匯入靠的是你 BridgeTopia 的登入狀態。** 同一個 Chrome 裡開著
 BridgeTopia、登入著就好（不用填 token，也不用讓那個分頁保持開啟）。沒登入的話匯入會說「尚未登入」。
 
 ## 用法

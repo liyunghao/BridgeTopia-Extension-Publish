@@ -189,11 +189,6 @@
         flex: 1;
         min-width: 0;
       }
-      #serverBtn {
-        margin-left: auto;
-        font-size: 1rem;
-        line-height: 1;
-      }
 
       .card {
         display: grid;
@@ -314,17 +309,7 @@
       <span class="step" data-step="2"><b>2</b>下載</span>
       <span>›</span>
       <span class="step" data-step="3"><b>3</b>匯入</span>
-      <button id="serverBtn" class="ghost link" title="匯入的目的地">⚙</button>
     </nav>
-
-    <section class="panel" id="serverPanel" hidden>
-      <label for="server">匯入的目的地</label>
-      <div class="row">
-        <input id="server" type="text" placeholder="http://localhost:8080" autocomplete="off" />
-        <button id="serverSave" class="ghost">存起來</button>
-      </div>
-      <div id="serverState"></div>
-    </section>
 
     <section class="panel">
       <label for="handle">BBO username</label>

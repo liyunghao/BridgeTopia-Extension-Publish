@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "BridgeTopia",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "BridgeTopia's extension, search and export deals to BridgeTopia",
   "permissions": ["storage", "scripting"],
   "comment_icons": "Four sizes of one drawing, resampled from the 128 with sips rather than left to Chrome: the toolbar draws it at 16 and letting the browser scale a 128 down that far turns the BT monogram to mush. 16/32 are the toolbar, 48 is chrome://extensions, 128 is the install prompt.",
@@ -11,9 +11,11 @@
     "48": "icons/48.png",
     "128": "icons/128.png"
   },
-  "comment_hosts": "Granted at install: BBO, and localhost:8080 as the default import target — that pair covers an untouched install with no prompt, and DEFAULT_SERVER in src/worker.js and src/popup.js is the same string. The wildcards are *optional*, so they are not granted at install and not usable until popup.html's ⚙ calls chrome.permissions.request() for one concrete origin. They exist because the import target moved onto a tailnet, where it is a hostname this build cannot know.",
-  "host_permissions": ["https://www.bridgebase.com/*", "http://localhost:8080/*"],
-  "optional_host_permissions": ["http://*/*", "https://*/*"],
+  "comment_hosts": "Two hosts, both required, both granted at install: BBO, where the listing needs the user's own session, and the one BridgeTopia server every user of this build imports into — the same string as SERVER in src/worker.js. No wildcards and no optional origins: the address is fixed at build time, so there is nothing for the user to type and nothing to request at runtime.",
+  "host_permissions": [
+    "https://www.bridgebase.com/*",
+    "https://bridgetopia.long-becrux.ts.net/*"
+  ],
   "background": { "service_worker": "src/worker.js" },
   "content_scripts": [
     {

@@ -16,10 +16,6 @@ const pullState = $('pullState')
 const statusLine = $('statusLine')
 const progress = $('progress')
 const bar = $('bar')
-const server = $('server')
-const serverPanel = $('serverPanel')
-const serverSave = $('serverSave')
-const serverState = $('serverState')
 
 const el = (tag, text) => Object.assign(document.createElement(tag), { textContent: text })
 
@@ -230,30 +226,6 @@ async function doPull(sessions) {
   }
 }
 
-const DEFAULT_SERVER = 'http://localhost:8080'
-
-function originOf(text) {
-  try {
-    const { protocol, origin } = new URL(text)
-    return protocol === 'http:' || protocol === 'https:' ? origin : null
-  } catch {
-    return null
-  }
-}
-
-function saveServer() {
-  const origin = originOf(server.value.trim())
-  if (!origin) return state(serverState, '位址要像 http://主機:埠號', 'err')
-
-  void chrome.permissions.request({ origins: [`${origin}/*`] }).then(async (granted) => {
-    if (!granted) return state(serverState, '沒有授權這個位址，目的地沒有改。', 'err')
-    await chrome.storage.sync.set({ server: origin })
-    server.value = origin
-    state(serverState, `匯入會送到 ${origin}`)
-  })
-}
-
-
 async function queuedIds() {
   const { pending: sessions = [] } = await chrome.storage.local.get('pending')
   return new Set(sessions.flatMap((s) => s.boards.map((b) => b.id)))
@@ -368,15 +340,6 @@ surveyBtn.addEventListener('click', () => void doSurvey())
 importBtn.addEventListener('click', () => void doImport())
 clearBtn.addEventListener('click', () => void doClear())
 
-$('serverBtn').addEventListener('click', () => {
-  serverPanel.hidden = !serverPanel.hidden
-  if (!serverPanel.hidden) server.focus()
-})
-serverSave.addEventListener('click', saveServer)
-server.addEventListener('keydown', (e) => {
-  if (e.key === 'Enter') saveServer()
-})
-
 chrome.storage.onChanged.addListener(async (changes) => {
   if (changes.progress) showProgress(changes.progress.newValue)
   if (!changes.pending) return
@@ -389,12 +352,8 @@ async function onBoot() {
   document.querySelector('.chip').click()
   setStep(1)
 
-  const { handle: saved = '', server: dst = DEFAULT_SERVER } = await chrome.storage.sync.get([
-    'handle',
-    'server',
-  ])
+  const { handle: saved = '' } = await chrome.storage.sync.get('handle')
   handle.value = saved
-  server.value = dst
 
   const queued = await render()
   showProgress(await liveProgress())

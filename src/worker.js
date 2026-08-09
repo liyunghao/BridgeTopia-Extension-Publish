@@ -1,11 +1,10 @@
-const DEFAULT_SERVER = 'http://localhost:8080'
+const SERVER = 'https://bridgetopia.long-becrux.ts.net'
 
 async function target() {
-  const { server = DEFAULT_SERVER } = await chrome.storage.sync.get('server')
-  if (!(await chrome.permissions.contains({ origins: [`${server}/*`] }))) {
-    throw new Error(`沒有 ${server} 的權限，去 popup 的 ⚙ 把位址再存一次`)
+  if (!(await chrome.permissions.contains({ origins: [`${SERVER}/*`] }))) {
+    throw new Error(`沒有 ${SERVER} 的權限，去 chrome://extensions 把這個擴充的網站存取權打開`)
   }
-  return server
+  return SERVER
 }
 
 let writes = Promise.resolve()
