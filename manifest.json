@@ -12,7 +12,7 @@
   },
   "host_permissions": [
     "https://www.bridgebase.com/*",
-    "https://bridgetopia.long-becrux.ts.net/*"
+    "https://bridgetopia.app/*"
   ],
   "background": { "service_worker": "src/worker.js" },
   "content_scripts": [

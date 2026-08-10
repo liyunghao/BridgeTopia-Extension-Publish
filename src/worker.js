@@ -1,4 +1,4 @@
-const SERVER = 'https://bridgetopia.long-becrux.ts.net'
+const SERVER = 'https://bridgetopia.app'
 
 async function target() {
   if (!(await chrome.permissions.contains({ origins: [`${SERVER}/*`] }))) {
